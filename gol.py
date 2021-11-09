@@ -4,14 +4,14 @@ from tkinter import *
 import time
 
 def main():
-    columns, delay, h = 30, 0, 10 
-    gol = Gol(columns, delay, h)
+    columns, delay, px = 40, 1, 5 
+    gol = Gol(columns, delay, px)
     gol.run() 
 
 class Gol():
-    def __init__(self, size, delay, h):
+    def __init__(self, size, delay, px):
         """Constructor. Set up some initial variables."""
-        self.size, self.delay, self.h = size, delay, h
+        self.size, self.delay, self.px = size, delay, px
         self.generating = self.generations = 0 
         self.alive = []
         self.message = "Ready."
@@ -27,7 +27,7 @@ class Gol():
         empty = PhotoImage(width=1, height=1, master=self.root)
         # create the cells
         for row, col in [(row, col) for row in range(self.size) for col in range(self.size)]:
-            self.cells[row].append(Cell(self.gol, image=empty, height=self.h, width=self.h, relief="flat", bg="grey", activebackground="green"))
+            self.cells[row].append(Cell(self.gol, image=empty, height=self.px, width=self.px, relief="flat", bg="grey", activebackground="green"))
             self.cells[row][col].grid(row=row,column=col)
             self.cells[row][col].initialise(self, row, col)
         
@@ -38,30 +38,30 @@ class Gol():
 
         self.stop = Button(self.gol, text = "Stop")
         self.stop["command"] = lambda: self.stopped()
-        self.stop.grid(row=4, column = self.size+1,rowspan=3)
+        self.stop.grid(row=3, column = self.size+1,rowspan=3)
 
         self.reset = Button(self.gol, text = "Reset")
         self.reset["command"] = lambda: self.clear()
-        self.reset.grid(row=8, column = self.size+1, rowspan=3)
+        self.reset.grid(row=6, column = self.size+1, rowspan=3)
 
         self.random = Button(self.gol, text = "Random")
         self.random["command"] = lambda: self.randomise()
-        self.random.grid(row=12, column = self.size+1, rowspan=3)
+        self.random.grid(row=9, column = self.size+1, rowspan=3)
 
         # labels
         self.gens = Label(self.gol,text = "Generations:\n0", fg="blue")
-        self.gens.grid(row=14, column = self.size+1, rowspan=5, padx=3)
+        self.gens.grid(row=12, column = self.size+1, rowspan=5, padx=3)
 
         self.alert = Label(self.gol, text=self.message, fg="blue")
-        self.alert.grid(row=17, column = self.size+1, rowspan=5,padx=3)
+        self.alert.grid(row=15, column = self.size+1, rowspan=5,padx=3)
 
         self.active = Label(self.gol, text= "Population:\n0", fg="blue")
-        self.active.grid(row=20, column = self.size+1, rowspan=5,padx=3)
+        self.active.grid(row=18, column = self.size+1, rowspan=5,padx=3)
         
+        # Add neighbours after all cells created.
         self.allCells = self.flatten() 
         for cell in self.allCells:
             cell.addNeighbours(self)
-        self.relevant = {}
         self.root.mainloop()
         
     def flatten(self):
@@ -79,16 +79,9 @@ class Gol():
         """Clear all cells."""
         self.generating = self.generations = 0
         self.message="Cleared."
-
-        #This is weird. This works.
-        # while self.alive:
-            # for c in self.alive:
-                # c.toggle(self)
-        # But this doesn't and I don't know why
-        for c in self.alive:
+        for c in self.alive[:]:
             c.toggle(self)
         self.refresh()
-
 
     def refresh(self):
         """Update labels."""
